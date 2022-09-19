@@ -1,11 +1,13 @@
-import "./styles.css";
-import Chart from "chart.js/auto";
+import './styles.css';
+import Chart from 'chart.js/auto';
 
-const chartDiv = document.getElementById("chart-div");
-const chartCanvas = document.getElementById("chart-canvas");
-const outputP = document.getElementById("output-p");
-const testButton = document.getElementById("test-button");
-testButton.addEventListener("click", test);
+const chartDiv = document.getElementById('chart-div');
+const chartCanvas = document.getElementById('chart-canvas');
+const outputP = document.getElementById('output-p');
+const testButton = document.getElementById('test-button');
+testButton.addEventListener('click', test);
+
+let timeoutIds = [];
 
 function addData(chart, label, data) {
   chart.data.labels.push(label);
@@ -29,23 +31,23 @@ function makeChart(xValuesInitial, yValuesInitial, title) {
     datasets: [
       {
         label: title,
-        backgroundColor: "rgb(255, 99, 132)",
-        borderColor: "rgb(255, 99, 132)",
-        data: yValuesInitial
-      }
-    ]
+        backgroundColor: 'rgb(255, 99, 132)',
+        borderColor: 'rgb(255, 99, 132)',
+        data: yValuesInitial,
+      },
+    ],
   };
 
   const config = {
-    type: "line",
+    type: 'line',
     data: data,
-    options: {}
+    options: {},
   };
 
   return new Chart(chartCanvas, config);
 }
 
-const chart = makeChart([], [], "Temperature vs Time");
+const chart = makeChart([], [], 'Temperature vs Time');
 const xValues = [];
 const yValues = [];
 
@@ -59,24 +61,36 @@ for (let time = 0; time <= 60; time++) {
 }
 
 function test() {
+  // hierdie is net om die vorige toets se scheduled calls te clear
+  timeoutIds.forEach((value) => {
+    clearTimeout(value);
+  });
+
+  // hierdie loop deur al die xValues...
   xValues.forEach((value, index) => {
-    setTimeout(() => {
-      let time = value;
-      let temperature = Math.round(yValues[index]);
+    timeoutIds.push(
+      setTimeout(
+        () => {
+          let time = value;
+          let temperature = Math.round(yValues[index]);
 
-      outputP.innerText = `t(${time}) = ${temperature}\u00B0C`;
+          outputP.innerText = `t(${time}) = ${temperature}\u00B0C`;
 
-      // ______________________________________
-      // < Jy gaan die API call hier moet maak. >
-      //  --------------------------------------
-      //         \   ^__^
-      //          \  (oo)\_______
-      //             (__)\       )\/\
-      //                 ||----w |
-      //                 ||     ||
-      // ***************************************
+          // ______________________________________
+          // < Jy gaan die API call hier moet maak. >
+          //  --------------------------------------
+          //         \   ^__^
+          //          \  (oo)\_______
+          //             (__)\       )\/\
+          //                 ||----w |
+          //                 ||     ||
+          // ***************************************
 
-      addData(chart, time, temperature);
-    }, index * 1000);
+          addData(chart, time, temperature);
+        },
+        index * 1000,
+        'timer'
+      )
+    );
   });
 }
